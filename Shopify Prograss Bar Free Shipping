@@ -1,0 +1,71 @@
+
+{% assign GoalPrice = 300 | times: 100 %}
+{%  assign CartPrice = cart.total_price %}
+{% assign PercentFlow = 100 | times: cart.total_price %}
+{% assign PercentDivided = PercentFlow | divided_by: GoalPrice %}
+
+
+<div class="freeshippingwrapper">
+  
+  {% if cart.items.size == 0 %}
+    Get free shipping when you spend {{ GoalPrice | money }}
+  {% endif %}
+
+  {% if cart.items.size != 0 %}
+      {% if cart.total_price >= GoalPrice %} <p class="text">FREE SHIPPING</p>
+      {% elsif cart.total_price < GoalPrice %}You're only {{ GoalPrice | minus: CartPrice | money }} away from FREE shipping.
+      {% endif %}
+  {% endif %}
+
+  <div class="progressbarwrapper">
+    <span class="progressbar"></span>
+  </div>
+</div>
+
+
+<style>
+  .freeshippingwrapper {
+    max-width: 100%;
+}
+
+.progressbarwrapper {
+    background: #ccc;
+    position: relative;
+    height: 1rem;
+    margin-bottom:10px;
+}
+
+span.progressbar {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    background: red;
+    min-width: 0px;
+    max-width: 100%;
+    display: block;
+    width: {{ PercentDivided }}%;
+    height: 100%;
+
+}
+
+span.progressbar:after{
+    content:"";
+    position:absolute;
+    background:red;
+    width:15px;
+    height:15px;
+    right:0px;
+    top:-3px;
+}
+.text ~ .progressbarwrapper .progressbar{
+  background:green;
+} 
+
+.text ~ .progressbarwrapper .progressbar:after{
+  background:green;
+} 
+
+
+  
+</style>
+
