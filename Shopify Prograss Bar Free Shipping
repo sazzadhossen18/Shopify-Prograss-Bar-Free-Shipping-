@@ -1,3 +1,183 @@
+Source:https://theprompted.notion.site/The-Prompted-Cart-Progress-Bar-For-Free-Shipping-Shopify-Tutorial-68d771334f3d4f2e9c4479c8130d97b2
+
+
+
+{% if cart != empty %}
+
+  {% assign progressThresholdDollars = settings.cart_progress_threshold %}
+  {% assign progressThreshold = progressThresholdDollars | times: 100 %}
+  {% assign preGoalMessageTemplate = settings.cart_pre_goal_message %}
+  {% assign postGoalMessage = settings.cart_post_goal_message %}
+
+
+  {% assign cartTotal = cart.total_price %} 
+  {% assign progressPercentage = cartTotal | times: 100 | divided_by: progressThreshold %}
+  {% if progressPercentage > 100 %}
+    {% assign progressPercentage = 100 %}
+  {% endif %}
+  
+  {% assign remainingForGoal = progressThreshold | minus: cartTotal %}
+  {% if remainingForGoal < 0 %}
+    {% assign remainingForGoal = 0 %}
+  {% endif %}
+  {% assign remainingForGoalFormatted = remainingForGoal | money %}
+  {% assign dynamicPreGoalMessage = preGoalMessageTemplate | replace: '[remainingForGoalFormatted]', remainingForGoalFormatted %}
+  
+  <div id="cart-progress-wrapper"
+    data-threshold="{{ progressThreshold }}" 
+    data-pre-goal-message-template="{{ preGoalMessageTemplate | escape }}"
+    data-post-goal-message="{{ postGoalMessage | escape }}"
+    data-money-format="{{ shop.money_format | escape }}"
+  >
+    <div class="cart-progress-bar-container">
+      <div id="cart-progress-bar" style="width: {{ progressPercentage }}%;"></div>
+    </div>
+    <div class="goal-message">
+      {% if remainingForGoal > 0 %}
+        {{ dynamicPreGoalMessage }}
+      {% else %}
+        {{ postGoalMessage }}
+      {% endif %}
+    </div>
+  </div>
+{% endif %}
+
+<style>
+  .cart-progress-bar-container {
+    width: 100%;
+    background-color: #eee;
+    border-radius: 10px;
+    margin: 2px auto;
+    padding: 1px; /* Add a small padding to make sure the container is visible */
+    overflow: hidden; /* Ensures that the bar does not overflow the container */
+  }
+
+  #cart-progress-bar {
+    display: block;
+    height: 10px; /* Increased for visibility */
+    background-color: {{ settings.cart_progress_bar_color }};
+    border-radius: 2px;
+    transition: width 0.5s ease-in-out;
+    border: 1px solid {{ settings.cart_progress_bar_color }}; /* Added a border for visibility */
+    padding: 5px 0; /* Padding to ensure the bar is thick enough */
+    box-sizing: border-box; /* Makes sure padding and border are included in the height */
+  }
+
+.goal-message {
+  text-align: center;
+  margin: 2px auto 10px;
+  font-size: 1em;
+  color: #333;
+}
+
+  
+</style>
+
+
+{
+      "type": "header",
+      "content": "Cart Progress Bar Settings"
+    },
+    {
+      "type": "text",
+      "id": "cart_progress_threshold",
+      "label": "Progress Threshold",
+      "default": "49",
+      "info": "Set the cart total required to unlock the goal."
+    },
+    {
+      "type": "text",
+      "id": "cart_pre_goal_message",
+      "label": "Pre-Goal Message",
+      "default": "You're only [remainingForGoalFormatted] away from <strong>FREE SHIPPING</strong>",
+      "info": "Message displayed before reaching the goal. Use [remainingForGoalFormatted] to insert the dynamic remaining amount."
+    },
+    {
+      "type": "text",
+      "id": "cart_post_goal_message",
+      "label": "Post-Goal Message",
+      "default": "🎉 Congrats! You've unlocked <strong>FREE SHIPPING</strong>",
+      "info": "Message displayed after reaching the goal."
+    },
+    {
+      "type": "color",
+      "id": "cart_progress_bar_color",
+      "label": "Progress Bar Color",
+      "default": "#d53600",
+      "info": "Color of the progress bar."
+    }
+
+<script>
+
+  const updatedCartTotal = parsedState.total_price;
+  this.updateProgressBar(updatedCartTotal);
+updateProgressBar(cartTotal, itemCount) {
+  const progressWrapper = document.getElementById('cart-progress-wrapper');
+
+  const moneyFormat = progressWrapper.dataset.moneyFormat;
+  const progressThreshold = parseInt(progressWrapper.dataset.threshold, 10);
+  const preGoalMessageTemplate = progressWrapper.dataset.preGoalMessageTemplate;
+  const postGoalMessage = progressWrapper.dataset.postGoalMessage;
+
+  const progressBar = document.getElementById('cart-progress-bar');
+  const goalMessageElement = document.querySelector('.goal-message');
+
+  if (itemCount === 0 || cartTotal === 0) {
+    if (progressWrapper) {
+      progressWrapper.style.display = 'none';
+    }
+    if (goalMessageElement) {
+      goalMessageElement.style.display = 'none';
+    }
+  } else {
+    if (progressBar) {
+      progressBar.style.display = 'block';
+      const progressPercentage = (cartTotal / progressThreshold) * 100;
+      progressBar.style.width = `${progressPercentage}%`;
+    }
+  
+    if (goalMessageElement) {
+      goalMessageElement.style.display = 'block';
+      let remainingForGoal = progressThreshold - cartTotal;
+  
+      if (remainingForGoal < 0) {
+        remainingForGoal = 0;
+      }
+  
+      const remainingAmount = remainingForGoal / 100;
+      const remainingAmountFormatted = moneyFormat.replace('{{amount}}', remainingAmount.toFixed(2));
+      const preGoalMessage = preGoalMessageTemplate.replace('[remainingForGoalFormatted]', remainingAmountFormatted);
+
+      goalMessageElement.innerHTML = remainingForGoal > 0 ? preGoalMessage : postGoalMessage;
+
+    }
+  }
+}
+
+</script>
+
+
+
+
+
+
+
+{%- unless settings.cart_type == 'drawer' -%}
+	{% render 'cart-progress-bar-custom' %}
+{%- endunless -%}
+
+{% render 'cart-progress-bar-custom' %}
+
+
+
+
+
+
+
+
+
+
+
 Method 1:
 ==========
 {% assign GoalPrice = 300 | times: 100 %}
